@@ -25,7 +25,7 @@ Scoring guide:
 
 Rules:
 - Be strict. A 7 means genuinely good copy.
-- Any channel scoring below 7 must be listed in the "retry" array.
+- Any channel scoring below 6 must be listed in the "retry" array.
 - "notes" must be actionable — explain WHAT to fix and HOW, not just that it's bad.
 
 Respond with ONLY valid JSON — no preamble, no explanation, no markdown code fences:
@@ -51,7 +51,7 @@ export async function runCritic(copyBundle, brief, onEvent) {
       model: MODELS.CRITIC,
       system: SYSTEM,
       messages: [{ role: 'user', content: userMsg }],
-      max_tokens: 256,
+      max_tokens: 512,
     });
 
     const critique = parseJSON(result.content);
@@ -59,7 +59,7 @@ export async function runCritic(copyBundle, brief, onEvent) {
     // Ensure retry is derived from scores < 7 if model didn't fill it
     if (!Array.isArray(critique.retry)) {
       critique.retry = Object.entries(critique.scores || {})
-        .filter(([, score]) => score < 7)
+        .filter(([, score]) => score < 6)
         .map(([channel]) => channel);
     }
 

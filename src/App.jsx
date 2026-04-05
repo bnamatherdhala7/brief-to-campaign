@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import './index.css';
 
 import { STATES, STATE_LABELS, transition } from './state/fsm.js';
@@ -14,7 +14,157 @@ import { CostCounter } from './components/CostCounter.jsx';
 import { StepCard } from './components/StepCard.jsx';
 import { CampaignPack } from './components/CampaignPack.jsx';
 
-// ─── Screen components ────────────────────────────────────────────────────────
+// ─── Workflow pipeline definition ─────────────────────────────────────────────
+
+const PIPELINE = [
+  {
+    id: 'analyse',
+    label: 'Analyse Brief',
+    description: 'Extract product, audience, goal and tone from your brief.',
+    agent: 'Brief Analyst',
+    model: 'Haiku',
+    est: '~4s',
+    activeStates: [STATES.EXTRACTING, STATES.AWAITING_CLARIFICATION],
+    doneStates:   [],
+  },
+  {
+    id: 'strategy',
+    label: 'Generate Strategy',
+    description: 'Create 3 distinct campaign concepts with confidence scores.',
+    agent: 'Strategy',
+    model: 'Sonnet',
+    est: '~10s',
+    activeStates: [STATES.STRATEGIZING, STATES.AWAITING_CONCEPT_PICK],
+    doneStates:   [],
+  },
+  {
+    id: 'write',
+    label: 'Write Copy',
+    description: 'Write LinkedIn, Email and Twitter copy for your chosen concept.',
+    agent: 'Copy',
+    model: 'Sonnet',
+    est: '~15s',
+    activeStates: [STATES.WRITING, STATES.RETRYING],
+    doneStates:   [],
+  },
+  {
+    id: 'review',
+    label: 'Review Quality',
+    description: 'Score copy against the brief. Retry any channel that scores below 6.',
+    agent: 'Critic',
+    model: 'Haiku',
+    est: '~4s',
+    activeStates: [STATES.REVIEWING],
+    doneStates:   [],
+  },
+];
+
+const STATE_STEP_INDEX = {
+  [STATES.EXTRACTING]:             0,
+  [STATES.AWAITING_CLARIFICATION]: 0,
+  [STATES.STRATEGIZING]:           1,
+  [STATES.AWAITING_CONCEPT_PICK]:  1,
+  [STATES.WRITING]:                2,
+  [STATES.RETRYING]:               2,
+  [STATES.REVIEWING]:              3,
+  [STATES.DONE]:                   4,
+};
+
+// ─── WorkflowProgress ─────────────────────────────────────────────────────────
+
+function WorkflowProgress({ fsmState }) {
+  const currentIdx = STATE_STEP_INDEX[fsmState] ?? -1;
+
+  return (
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: 0,
+      marginBottom: 'var(--space-8)',
+      padding: 'var(--space-4) var(--space-6)',
+      background: 'var(--bg-elevated)',
+      borderBottom: '1px solid var(--border-subtle)',
+    }}>
+      {PIPELINE.map((step, i) => {
+        const isDone    = currentIdx > i;
+        const isActive  = currentIdx === i;
+        const isUpcoming = currentIdx < i;
+
+        const dotColor = isDone ? 'var(--c-strategy)'
+          : isActive ? 'var(--accent)'
+          : 'var(--border-strong)';
+
+        return (
+          <div key={step.id} style={{ display: 'flex', alignItems: 'center', flex: i < PIPELINE.length - 1 ? 1 : 'none' }}>
+            {/* Step */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', flexShrink: 0 }}>
+              {/* Dot */}
+              <div style={{
+                width: 22, height: 22,
+                borderRadius: '50%',
+                background: isDone ? 'var(--c-strategy)' : isActive ? 'var(--accent-glow)' : 'var(--bg-overlay)',
+                border: `2px solid ${dotColor}`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                flexShrink: 0,
+                animation: isActive ? 'pulse-dot 1.4s ease infinite' : 'none',
+              }}>
+                {isDone ? (
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                    <path d="M2 5l2.5 2.5L8 3" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                ) : (
+                  <span style={{
+                    fontSize: 9,
+                    fontWeight: 700,
+                    color: isActive ? 'var(--accent)' : 'var(--text-muted)',
+                    fontFamily: 'ui-monospace, monospace',
+                  }}>{i + 1}</span>
+                )}
+              </div>
+
+              {/* Label */}
+              <div>
+                <div style={{
+                  fontSize: 'var(--text-xs)',
+                  fontWeight: isActive ? 700 : 500,
+                  color: isDone ? 'var(--c-strategy)' : isActive ? 'var(--text-primary)' : 'var(--text-muted)',
+                  whiteSpace: 'nowrap',
+                }}>
+                  {step.label}
+                </div>
+                {isUpcoming && (
+                  <div style={{ fontSize: 10, color: 'var(--text-muted)', fontFamily: 'ui-monospace, monospace' }}>
+                    {step.est}
+                  </div>
+                )}
+                {isActive && (
+                  <div style={{ fontSize: 10, color: 'var(--accent)', fontFamily: 'ui-monospace, monospace' }}>
+                    running…
+                  </div>
+                )}
+                {isDone && (
+                  <div style={{ fontSize: 10, color: 'var(--c-strategy)' }}>done</div>
+                )}
+              </div>
+            </div>
+
+            {/* Connector line */}
+            {i < PIPELINE.length - 1 && (
+              <div style={{
+                flex: 1,
+                height: 1,
+                margin: '0 var(--space-3)',
+                background: isDone ? 'var(--c-strategy)' : 'var(--border-subtle)',
+              }} />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── BriefInputScreen ─────────────────────────────────────────────────────────
 
 function BriefInputScreen({ onSubmit, isLoading }) {
   const [text, setText] = useState('');
@@ -26,46 +176,87 @@ function BriefInputScreen({ onSubmit, isLoading }) {
   ];
 
   return (
-    <div className="animate-in" style={{ maxWidth: 640, margin: '0 auto', paddingTop: 'var(--space-16)' }}>
-      <div style={{ marginBottom: 'var(--space-8)' }}>
-        <div style={{
-          fontSize: 'var(--text-xs)',
-          textTransform: 'uppercase',
-          letterSpacing: '0.1em',
-          color: 'var(--c-orchestrator)',
-          fontWeight: 600,
-          marginBottom: 'var(--space-3)',
-        }}>
-          Brief → Campaign
-        </div>
-        <h1 style={{
-          fontFamily: 'var(--font-display)',
-          fontSize: 'clamp(28px, 5vw, 44px)',
-          letterSpacing: '-0.03em',
-          color: 'var(--text-primary)',
-          lineHeight: 1.15,
-          marginBottom: 'var(--space-4)',
-        }}>
-          Turn a brief into a<br />
-          <em style={{ fontStyle: 'italic', color: 'var(--c-strategy)' }}>full campaign pack</em>
-        </h1>
-        <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-base)', lineHeight: 1.7 }}>
-          5 specialised agents analyse your brief, generate strategy concepts, write channel copy, and critique it — all transparently.
-        </p>
+    <div className="animate-in" style={{ maxWidth: 620, margin: '0 auto', paddingTop: 'var(--space-16)' }}>
+
+      {/* Eyebrow */}
+      <div style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 'var(--space-2)',
+        padding: '4px 12px',
+        borderRadius: 100,
+        background: 'var(--accent-glow)',
+        border: '1px solid rgba(127,119,221,0.25)',
+        marginBottom: 'var(--space-5)',
+      }}>
+        <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--accent)', display: 'inline-block' }} />
+        <span style={{ fontSize: 'var(--text-xs)', color: 'var(--accent)', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+          5-agent AI system
+        </span>
       </div>
 
-      {/* Text area */}
-      <div style={{ marginBottom: 'var(--space-4)' }}>
+      <h1 style={{
+        fontFamily: 'var(--font-display)',
+        fontSize: 'clamp(30px, 5vw, 46px)',
+        letterSpacing: '-0.03em',
+        color: 'var(--text-primary)',
+        lineHeight: 1.1,
+        marginBottom: 'var(--space-4)',
+      }}>
+        Brief in.<br />
+        <em style={{ fontStyle: 'italic', color: 'var(--c-strategy)' }}>Campaign pack out.</em>
+      </h1>
+
+      <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-base)', lineHeight: 1.7, marginBottom: 'var(--space-8)', maxWidth: 520 }}>
+        Paste a rough brief. Five specialised agents analyse it, generate strategy concepts, write copy for LinkedIn, Email and Twitter, then critique it — all in under 45 seconds.
+      </p>
+
+      {/* Pipeline preview */}
+      <div style={{
+        display: 'flex',
+        gap: 'var(--space-2)',
+        marginBottom: 'var(--space-8)',
+        flexWrap: 'wrap',
+      }}>
+        {[
+          { label: 'Analyse', color: 'var(--c-analyst)', est: '4s' },
+          { label: 'Strategy', color: 'var(--c-strategy)', est: '10s' },
+          { label: 'Write Copy', color: 'var(--c-copy)', est: '15s' },
+          { label: 'Review', color: 'var(--c-critic)', est: '4s' },
+        ].map((step, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '3px 10px',
+              background: 'var(--bg-floating)',
+              border: '1px solid var(--border-default)',
+              borderRadius: 100,
+              fontSize: 'var(--text-xs)',
+              color: step.color,
+              fontWeight: 500,
+            }}>
+              <span style={{ fontFamily: 'ui-monospace, monospace', color: 'var(--text-muted)', fontSize: 10 }}>{step.est}</span>
+              {step.label}
+            </div>
+            {i < 3 && <span style={{ color: 'var(--text-muted)', fontSize: 10 }}>→</span>}
+          </div>
+        ))}
+      </div>
+
+      {/* Input */}
+      <div style={{ position: 'relative', marginBottom: 'var(--space-3)' }}>
         <textarea
           value={text}
           onChange={e => setText(e.target.value)}
-          placeholder="Describe your product, audience, goal, and tone. Be as brief or detailed as you like — the agents will ask if anything's missing."
+          placeholder="Describe your product, audience, goal and tone. Be as rough as you like — the agents will ask if anything's missing."
           disabled={isLoading}
+          rows={5}
           style={{
             width: '100%',
-            minHeight: 140,
             background: 'var(--bg-elevated)',
-            border: '1px solid var(--border-default)',
+            border: '1.5px solid var(--border-default)',
             borderRadius: 'var(--radius-lg)',
             padding: 'var(--space-4)',
             color: 'var(--text-primary)',
@@ -80,7 +271,6 @@ function BriefInputScreen({ onSubmit, isLoading }) {
         />
       </div>
 
-      {/* CTA */}
       <button
         onClick={() => text.trim() && onSubmit(text.trim())}
         disabled={!text.trim() || isLoading}
@@ -88,7 +278,7 @@ function BriefInputScreen({ onSubmit, isLoading }) {
           width: '100%',
           padding: 'var(--space-4)',
           background: text.trim() && !isLoading ? 'var(--accent)' : 'var(--bg-floating)',
-          border: `1px solid ${text.trim() && !isLoading ? 'var(--accent)' : 'var(--border-default)'}`,
+          border: `1.5px solid ${text.trim() && !isLoading ? 'var(--accent)' : 'var(--border-default)'}`,
           borderRadius: 'var(--radius-md)',
           color: text.trim() && !isLoading ? '#fff' : 'var(--text-muted)',
           fontSize: 'var(--text-base)',
@@ -100,22 +290,23 @@ function BriefInputScreen({ onSubmit, isLoading }) {
           alignItems: 'center',
           justifyContent: 'center',
           gap: 'var(--space-2)',
+          marginBottom: 'var(--space-6)',
         }}
-        onMouseEnter={e => { if (text.trim() && !isLoading) e.currentTarget.style.opacity = '0.9'; }}
+        onMouseEnter={e => { if (text.trim() && !isLoading) e.currentTarget.style.opacity = '0.88'; }}
         onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+        onMouseDown={e => { if (text.trim() && !isLoading) e.currentTarget.style.transform = 'scale(0.99)'; }}
+        onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
       >
         {isLoading ? (
           <>
-            <span style={{ width: 14, height: 14, border: '2px solid #fff6', borderTopColor: '#fff', borderRadius: '50%', display: 'inline-block' }} className="spin" />
+            <span style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', display: 'inline-block' }} className="spin" />
             Running agents…
           </>
-        ) : (
-          'Generate Campaign →'
-        )}
+        ) : 'Generate Campaign →'}
       </button>
 
       {/* Examples */}
-      <div style={{ marginTop: 'var(--space-6)' }}>
+      <div>
         <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginBottom: 'var(--space-2)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
           Try an example
         </div>
@@ -138,8 +329,8 @@ function BriefInputScreen({ onSubmit, isLoading }) {
               marginBottom: 'var(--space-2)',
               lineHeight: 1.5,
             }}
-            onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--border-default)'}
-            onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-subtle)'}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-subtle)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
           >
             {ex}
           </button>
@@ -149,9 +340,10 @@ function BriefInputScreen({ onSubmit, isLoading }) {
   );
 }
 
+// ─── ClarificationScreen ──────────────────────────────────────────────────────
+
 function ClarificationScreen({ questions, brief, onSubmit }) {
   const [answers, setAnswers] = useState({});
-
   const allAnswered = questions.every(q => (answers[q.field] || '').trim());
 
   return (
@@ -160,7 +352,7 @@ function ClarificationScreen({ questions, brief, onSubmit }) {
         agent="Brief Analyst"
         model="Haiku"
         title="A couple of things…"
-        rationale="The Brief Analyst extracted your brief but found some fields missing. Answering these 2 questions lets the Strategy agent work with a complete picture."
+        rationale="The Brief Analyst extracted your brief but found some fields missing. Answering these questions lets the Strategy agent work with a complete picture."
         status="done"
       >
         <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', marginBottom: 'var(--space-4)' }}>
@@ -214,7 +406,7 @@ function ClarificationScreen({ questions, brief, onSubmit }) {
             fontFamily: 'var(--font-body)',
             cursor: allAnswered ? 'pointer' : 'not-allowed',
           }}
-          onMouseEnter={e => { if (allAnswered) e.currentTarget.style.opacity = '0.9'; }}
+          onMouseEnter={e => { if (allAnswered) e.currentTarget.style.opacity = '0.88'; }}
           onMouseLeave={e => e.currentTarget.style.opacity = '1'}
         >
           Continue to Strategy →
@@ -224,13 +416,13 @@ function ClarificationScreen({ questions, brief, onSubmit }) {
   );
 }
 
+// ─── ConceptPickScreen ────────────────────────────────────────────────────────
+
 function ConceptPickScreen({ concepts, onPick, onRegenerate, isRegenerating }) {
   const [hovered, setHovered] = useState(null);
 
-  const SONNET_COST_ESTIMATE = '$0.003';
-
   return (
-    <div className="animate-in" style={{ maxWidth: 680, margin: '0 auto', paddingTop: 'var(--space-10)' }}>
+    <div className="animate-in" style={{ maxWidth: 680, margin: '0 auto', paddingTop: 'var(--space-8)' }}>
       <StepCard
         agent="Strategy"
         model="Sonnet"
@@ -250,12 +442,12 @@ function ConceptPickScreen({ concepts, onPick, onRegenerate, isRegenerating }) {
                 width: '100%',
                 textAlign: 'left',
                 background: hovered === i ? 'var(--bg-overlay)' : 'var(--bg-floating)',
-                border: `1px solid ${hovered === i ? 'var(--c-strategy)66' : 'var(--border-default)'}`,
+                border: `1.5px solid ${hovered === i ? 'var(--c-strategy)66' : 'var(--border-default)'}`,
                 borderRadius: 'var(--radius-md)',
                 padding: 'var(--space-4)',
                 cursor: 'pointer',
                 fontFamily: 'var(--font-body)',
-                transform: hovered === i ? 'translateY(-1px)' : 'translateY(0)',
+                transform: hovered === i ? 'translateY(-2px)' : 'translateY(0)',
                 transition: 'transform 150ms ease, border-color 150ms ease, background 150ms ease',
               }}
             >
@@ -269,7 +461,6 @@ function ConceptPickScreen({ concepts, onPick, onRegenerate, isRegenerating }) {
                 }}>
                   {concept.name}
                 </span>
-                {/* Confidence bar */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', flexShrink: 0 }}>
                   <div style={{ width: 52, height: 4, background: 'var(--border-default)', borderRadius: 2, overflow: 'hidden' }}>
                     <div style={{
@@ -279,16 +470,11 @@ function ConceptPickScreen({ concepts, onPick, onRegenerate, isRegenerating }) {
                       borderRadius: 2,
                     }} />
                   </div>
-                  <span style={{
-                    fontSize: 'var(--text-xs)',
-                    color: 'var(--text-muted)',
-                    fontFamily: 'ui-monospace, Consolas, monospace',
-                  }}>
+                  <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontFamily: 'ui-monospace, monospace' }}>
                     {Math.round(concept.confidence * 100)}%
                   </span>
                 </div>
               </div>
-
               <p style={{ fontSize: 'var(--text-sm)', color: 'var(--c-strategy)', marginBottom: 'var(--space-2)', fontWeight: 500 }}>
                 {concept.hook}
               </p>
@@ -299,7 +485,6 @@ function ConceptPickScreen({ concepts, onPick, onRegenerate, isRegenerating }) {
           ))}
         </div>
 
-        {/* Regenerate option */}
         <button
           onClick={onRegenerate}
           disabled={isRegenerating}
@@ -320,46 +505,144 @@ function ConceptPickScreen({ concepts, onPick, onRegenerate, isRegenerating }) {
           onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
         >
           {isRegenerating
-            ? <><span className="spin" style={{ width: 10, height: 10, border: '1.5px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%', display: 'inline-block' }} />  Regenerating…</>
-            : `↺  Regenerate concepts (≈ ${SONNET_COST_ESTIMATE})`
-          }
+            ? <><span className="spin" style={{ width: 10, height: 10, border: '1.5px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%', display: 'inline-block' }} /> Regenerating…</>
+            : '↺  Regenerate concepts (≈ $0.002)'}
         </button>
       </StepCard>
     </div>
   );
 }
 
+// ─── RunningScreen ────────────────────────────────────────────────────────────
+
+const RUNNING_CONTEXT = {
+  [STATES.EXTRACTING]: {
+    agent: 'Brief Analyst',
+    color: 'var(--c-analyst)',
+    title: 'Analysing your brief',
+    detail: 'Extracting product, audience, goal, channels and tone into a typed schema.',
+    nextSteps: ['Strategy Agent generates 3 concepts (~10s)', 'You pick a direction', 'Copy Agent writes all 3 channels (~15s)', 'Critic reviews quality (~4s)'],
+  },
+  [STATES.STRATEGIZING]: {
+    agent: 'Strategy',
+    color: 'var(--c-strategy)',
+    title: 'Generating campaign concepts',
+    detail: 'Creating 3 meaningfully different campaign angles with confidence scores.',
+    nextSteps: ['You pick a direction', 'Copy Agent writes all 3 channels (~15s)', 'Critic reviews quality (~4s)'],
+  },
+  [STATES.WRITING]: {
+    agent: 'Copy',
+    color: 'var(--c-copy)',
+    title: 'Writing channel copy',
+    detail: 'Writing LinkedIn, Email and Twitter copy for your concept in one batched call.',
+    nextSteps: ['Critic reviews all 3 channels (~4s)', 'Campaign pack ready'],
+  },
+  [STATES.REVIEWING]: {
+    agent: 'Critic',
+    color: 'var(--c-critic)',
+    title: 'Reviewing copy quality',
+    detail: 'Scoring each channel against the brief. Any channel below 6/10 triggers a revision.',
+    nextSteps: ['Campaign pack ready'],
+  },
+  [STATES.RETRYING]: {
+    agent: 'Copy',
+    color: 'var(--c-copy)',
+    title: 'Revising copy',
+    detail: 'Re-writing flagged channels using the Critic\'s notes as context.',
+    nextSteps: ['Critic re-evaluates revised channels (~4s)', 'Campaign pack ready'],
+  },
+};
+
 function RunningScreen({ fsmState }) {
-  const messages = {
-    [STATES.EXTRACTING]:  'Brief Analyst is reading your brief…',
-    [STATES.STRATEGIZING]: 'Strategy agent is ideating concepts…',
-    [STATES.WRITING]:     'Copy agent is writing for all 3 channels…',
-    [STATES.REVIEWING]:   'Critic agent is evaluating copy quality…',
-    [STATES.RETRYING]:    'Copy agent is revising based on critique…',
-  };
+  const ctx = RUNNING_CONTEXT[fsmState] || RUNNING_CONTEXT[STATES.EXTRACTING];
 
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingTop: 'var(--space-16)',
-      gap: 'var(--space-4)',
+    <div className="animate-in" style={{
+      maxWidth: 520,
+      margin: '0 auto',
+      paddingTop: 'var(--space-10)',
     }}>
+      {/* Agent card */}
       <div style={{
-        width: 40,
-        height: 40,
-        border: '3px solid var(--border-default)',
-        borderTopColor: 'var(--accent)',
-        borderRadius: '50%',
-      }} className="spin" />
-      <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-base)' }}>
-        {messages[fsmState] || 'Running…'}
-      </p>
-      <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
-        Watch the agent trace on the left
-      </p>
+        background: 'var(--bg-elevated)',
+        border: `1px solid ${ctx.color}33`,
+        borderRadius: 'var(--radius-lg)',
+        padding: 'var(--space-6)',
+        marginBottom: 'var(--space-5)',
+      }}>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', marginBottom: 'var(--space-4)' }}>
+          <div style={{
+            width: 36, height: 36,
+            borderRadius: 'var(--radius-sm)',
+            background: ctx.color + '20',
+            border: `1px solid ${ctx.color}44`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <span style={{
+              width: 10, height: 10,
+              borderRadius: '50%',
+              background: ctx.color,
+              display: 'inline-block',
+              animation: 'pulse-dot 1.2s ease infinite',
+            }} />
+          </div>
+          <div>
+            <div style={{ fontSize: 'var(--text-xs)', color: ctx.color, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.07em' }}>
+              {ctx.agent} Agent
+            </div>
+            <div style={{ fontSize: 'var(--text-lg)', color: 'var(--text-primary)', fontFamily: 'var(--font-display)', letterSpacing: '-0.02em' }}>
+              {ctx.title}
+            </div>
+          </div>
+
+          {/* Spinner */}
+          <div style={{ marginLeft: 'auto' }}>
+            <div style={{
+              width: 20, height: 20,
+              border: `2px solid ${ctx.color}33`,
+              borderTopColor: ctx.color,
+              borderRadius: '50%',
+            }} className="spin" />
+          </div>
+        </div>
+
+        <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0 }}>
+          {ctx.detail}
+        </p>
+      </div>
+
+      {/* What's next */}
+      {ctx.nextSteps.length > 0 && (
+        <div>
+          <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 'var(--space-3)' }}>
+            What's next
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+            {ctx.nextSteps.map((step, i) => (
+              <div key={i} style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 'var(--space-3)',
+                padding: 'var(--space-2) var(--space-3)',
+                background: 'var(--bg-elevated)',
+                borderRadius: 'var(--radius-sm)',
+                border: '1px solid var(--border-subtle)',
+              }}>
+                <span style={{
+                  width: 18, height: 18, borderRadius: '50%',
+                  border: '1.5px solid var(--border-strong)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  flexShrink: 0,
+                }}>
+                  <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--border-strong)', display: 'block' }} />
+                </span>
+                <span style={{ fontSize: 'var(--text-sm)', color: 'var(--text-muted)' }}>{step}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -371,71 +654,57 @@ export default function App() {
   const [events, setEvents]           = useState([]);
   const [totalCost, setTotalCost]     = useState(0);
   const [brief, setBrief]             = useState(null);
-  const [rawBrief, setRawBrief]       = useState('');
   const [clarifyQs, setClarifyQs]     = useState([]);
   const [concepts, setConcepts]       = useState([]);
   const [selectedConcept, setSelectedConcept] = useState(null);
   const [copyBundle, setCopyBundle]   = useState(null);
   const [critique, setCritique]       = useState(null);
   const [error, setError]             = useState(null);
-  const [retryCount, setRetryCount]   = useState(0);
   const [isRegeneratingConcepts, setIsRegeneratingConcepts] = useState(false);
 
-  const MAX_RETRIES = 2;
+  const MAX_RETRIES = 1; // one retry max — saves ~$0.005 vs 2 retries
 
-  // Emit an agent event and update cost atomically
   const emit = useCallback((event, cost = 0) => {
     setEvents(evs => [...evs, event]);
     if (cost > 0) setTotalCost(t => t + cost);
   }, []);
 
-  // FSM transition helper — throws on invalid
   const go = useCallback((to) => {
     setFsmState(current => {
-      transition(current, to); // validates
+      transition(current, to);
       return to;
     });
   }, []);
 
-  // Reset everything
   const restart = useCallback(() => {
     setFsmState(STATES.IDLE);
     setEvents([]);
     setTotalCost(0);
     setBrief(null);
-    setRawBrief('');
     setClarifyQs([]);
     setConcepts([]);
     setSelectedConcept(null);
     setCopyBundle(null);
     setCritique(null);
     setError(null);
-    setRetryCount(0);
   }, []);
 
-  // ── Step 1: Submit brief → Orchestrator + Analyst ──
   const handleBriefSubmit = useCallback(async (text) => {
-    setRawBrief(text);
     setError(null);
     go(STATES.EXTRACTING);
 
     try {
-      // 1a. Orchestrator plans the workflow
       const { cost: oCost } = await runOrchestrator(text, (ev) => emit(ev));
       setTotalCost(t => t + oCost);
 
-      // 1b. Brief Analyst extracts schema
       const { brief: extracted, cost: aCost } = await runAnalyst(text, (ev) => emit(ev));
       setTotalCost(t => t + aCost);
       setBrief(extracted);
 
       if (extracted.gaps && extracted.gaps.length > 0) {
-        // Need clarification
-        const questions = gapsToQuestions(extracted.gaps);
-        setClarifyQs(questions);
+        setClarifyQs(gapsToQuestions(extracted.gaps));
         go(STATES.AWAITING_CLARIFICATION);
       } else {
-        // Proceed straight to strategy
         await runStrategyPhase(extracted);
       }
     } catch (err) {
@@ -444,13 +713,11 @@ export default function App() {
     }
   }, [emit, go]);
 
-  // ── Step 2: Clarification answered ──
   const handleClarificationSubmit = useCallback(async (completeBrief) => {
     setBrief(completeBrief);
     await runStrategyPhase(completeBrief);
   }, []);
 
-  // ── Strategy phase ──
   const runStrategyPhase = useCallback(async (completeBrief) => {
     try {
       setFsmState(STATES.STRATEGIZING);
@@ -464,7 +731,6 @@ export default function App() {
     }
   }, [emit]);
 
-  // ── Regenerate concepts ──
   const handleRegenerateConcepts = useCallback(async () => {
     setIsRegeneratingConcepts(true);
     try {
@@ -481,23 +747,18 @@ export default function App() {
     }
   }, [brief, emit]);
 
-  // ── Step 3: Concept picked → Copy + Critic ──
   const handleConceptPick = useCallback(async (concept) => {
     setSelectedConcept(concept);
-    setRetryCount(0);
     await runCopyPhase(concept, brief, null, 0);
   }, [brief]);
 
-  // ── Copy + Critic loop ──
   const runCopyPhase = useCallback(async (concept, currentBrief, critiqueNotes, currentRetry) => {
     try {
-      // Writing
       setFsmState(currentRetry > 0 ? STATES.RETRYING : STATES.WRITING);
       const { copyBundle: newBundle, cost: copyCost } = await runCopy(concept, currentBrief, critiqueNotes, (ev) => emit(ev));
       setTotalCost(t => t + copyCost);
       setCopyBundle(newBundle);
 
-      // Reviewing
       setFsmState(STATES.REVIEWING);
       const { critique: newCritique, cost: criticCost } = await runCritic(newBundle, currentBrief, (ev) => emit(ev));
       setTotalCost(t => t + criticCost);
@@ -506,7 +767,6 @@ export default function App() {
       const needsRetry = newCritique.retry && newCritique.retry.length > 0;
 
       if (needsRetry && currentRetry < MAX_RETRIES) {
-        setRetryCount(currentRetry + 1);
         await runCopyPhase(concept, currentBrief, newCritique, currentRetry + 1);
       } else {
         setFsmState(STATES.DONE);
@@ -517,7 +777,6 @@ export default function App() {
     }
   }, [emit]);
 
-  // ── Determine which screen to show ──
   const showTracePanel = fsmState !== STATES.IDLE;
 
   const mainContent = () => {
@@ -575,11 +834,19 @@ export default function App() {
             paddingTop: 'var(--space-16)',
             textAlign: 'center',
           }}>
-            <div style={{ fontSize: 32, marginBottom: 'var(--space-4)' }}>⚠</div>
-            <h2 style={{ color: 'var(--c-critic)', marginBottom: 'var(--space-3)', fontSize: 'var(--text-xl)' }}>
+            <div style={{
+              width: 48, height: 48,
+              borderRadius: 'var(--radius-md)',
+              background: 'rgba(216,90,48,0.12)',
+              border: '1px solid rgba(216,90,48,0.3)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              margin: '0 auto var(--space-4)',
+              fontSize: 22,
+            }}>⚠</div>
+            <h2 style={{ color: 'var(--c-critic)', marginBottom: 'var(--space-3)', fontSize: 'var(--text-xl)', fontFamily: 'var(--font-display)' }}>
               Something went wrong
             </h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-sm)', marginBottom: 'var(--space-6)' }}>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-sm)', marginBottom: 'var(--space-6)', lineHeight: 1.7 }}>
               {error || 'An unexpected error occurred. Check the trace panel for details.'}
             </p>
             <button
@@ -594,6 +861,8 @@ export default function App() {
                 fontFamily: 'var(--font-body)',
                 cursor: 'pointer',
               }}
+              onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--border-strong)'}
+              onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-default)'}
             >
               Try again
             </button>
@@ -616,7 +885,7 @@ export default function App() {
         <div style={{
           width: '30%',
           minWidth: 240,
-          maxWidth: 340,
+          maxWidth: 320,
           height: '100dvh',
           position: 'sticky',
           top: 0,
@@ -630,7 +899,6 @@ export default function App() {
       <div style={{
         flex: 1,
         overflowY: 'auto',
-        padding: showTracePanel ? 'var(--space-6) var(--space-8)' : 'var(--space-4) var(--space-6)',
         display: 'flex',
         flexDirection: 'column',
       }}>
@@ -639,11 +907,11 @@ export default function App() {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: 'var(--space-4)',
-          paddingBottom: 'var(--space-4)',
-          borderBottom: showTracePanel ? '1px solid var(--border-subtle)' : 'none',
+          padding: 'var(--space-4) var(--space-8)',
+          borderBottom: '1px solid var(--border-subtle)',
           flexWrap: 'wrap',
           gap: 'var(--space-2)',
+          flexShrink: 0,
         }}>
           <div style={{
             fontSize: 'var(--text-sm)',
@@ -656,8 +924,13 @@ export default function App() {
           {totalCost > 0 && <CostCounter totalCost={totalCost} />}
         </div>
 
+        {/* Progress stepper — visible during workflow */}
+        {showTracePanel && fsmState !== STATES.DONE && fsmState !== STATES.ERROR && (
+          <WorkflowProgress fsmState={fsmState} />
+        )}
+
         {/* Screen content */}
-        <div style={{ flex: 1 }}>
+        <div style={{ flex: 1, padding: showTracePanel ? 'var(--space-6) var(--space-8)' : 'var(--space-4) var(--space-6)' }}>
           {mainContent()}
         </div>
       </div>

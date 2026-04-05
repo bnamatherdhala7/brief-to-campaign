@@ -47,7 +47,7 @@ export async function runAnalyst(rawBrief, onEvent) {
       model: MODELS.ANALYST,
       system: SYSTEM,
       messages: [{ role: 'user', content: rawBrief }],
-      max_tokens: 300,
+      max_tokens: 400,
     });
 
     const brief = parseJSON(result.content);

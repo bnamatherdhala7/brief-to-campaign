@@ -38,7 +38,7 @@ export async function runOrchestrator(rawBrief, onEvent) {
       model: MODELS.ORCHESTRATOR,
       system: SYSTEM,
       messages: [{ role: 'user', content: rawBrief }],
-      max_tokens: 256,
+      max_tokens: 512,
     });
 
     const parsed = parseJSON(result.content);

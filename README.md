@@ -64,20 +64,43 @@ After copy is written, the Critic scores each channel. Any channel scoring below
 
 ### 1. Brief Input
 ![Brief input screen](docs/screenshots/01-brief-input.png)
+> The landing screen. Paste a rough brief in plain English — or pick one of the examples. The pipeline preview ("Analyse → Strategy → Write Copy → Review") sets expectations before a single token is spent.
 
-### 2. Clarification Gate (when brief has gaps)
-![Clarification questions](docs/screenshots/02-clarification.png)
+---
 
-### 3. Concept Selection Gate
-![Concept picker with confidence scores](docs/screenshots/03-concept-pick.png)
+### 2. Brief Filled In
+![Brief filled in](docs/screenshots/02-brief-filled.png)
+> Once you start typing the CTA button activates. The agents will surface a clarification gate if anything critical is missing — you don't need a perfect brief.
 
-### 4. Live Agent Trace Panel
-![Trace panel showing agent events, tokens, latency](docs/screenshots/04-trace-panel.png)
+---
 
-### 5. Campaign Pack Output
-![Final campaign pack with LinkedIn, Email, Twitter copy](docs/screenshots/05-campaign-pack.png)
+### 3. Agents Running — Live Trace Panel
+![Agents running with trace panel](docs/screenshots/03-agents-running.png)
+> Immediately after submit, the two-column layout appears. Left: the live agent trace panel — each event streams in as it fires, showing agent name, status badge, model used (Haiku vs Sonnet), latency in ms, and token count. Right: the progress stepper at the top shows exactly where you are in the pipeline with time estimates for upcoming steps. The running card shows which agent is active, what it's doing, and what comes next.
 
-> **To add screenshots:** take them while running locally and save to `docs/screenshots/`. File names match the references above.
+---
+
+### 4. Concept Picker (Human Gate 1)
+![Concept picker with confidence scores](docs/screenshots/05-concept-picker.png)
+> The Strategy Agent returns 3 meaningfully different campaign angles, each with a confidence score (0–100%) reflecting how well it matches the stated goal. **The workflow is blocked until you pick one.** This is a deliberate human checkpoint — the selected concept becomes the creative brief for the Copy agent.
+
+---
+
+### 5. Copy Agent Writing
+![Copy agent writing](docs/screenshots/06-copy-writing.png)
+> The Copy agent writes LinkedIn, Email and Twitter copy in a **single batched API call** — not 3 separate calls. The progress stepper updates in real time. "What's next" shows the remaining steps so you always know the end is in sight.
+
+---
+
+### 6. Campaign Pack — Output
+![Campaign pack top](docs/screenshots/07-campaign-pack-top.png)
+> The finished campaign pack. The concept name and hook are shown at the top, with quality scores per channel from the Critic agent (e.g. LinkedIn: 8/10, Email: 7/10, Twitter: 9/10). The cost counter in the top right shows the total spend for the full 5-agent run — typically $0.006–0.010.
+
+---
+
+### 7. Campaign Pack — Copy Sections
+![Campaign pack LinkedIn copy](docs/screenshots/08-campaign-pack-linkedin.png)
+> Each channel section renders a live social preview card (LinkedIn mockup shown here) followed by the raw copy fields — headline, body, CTA. The copy is ready to use or adapt.
 
 ---
 
