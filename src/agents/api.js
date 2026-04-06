@@ -31,6 +31,10 @@ export async function callAnthropic({ model, system, messages, max_tokens = 1024
     throw new Error(`Invalid JSON from proxy (status ${response.status})`);
   }
 
+  if (response.status === 429) {
+    throw new Error(data.error || 'Daily limit reached. This demo allows 2 campaigns per day. Try again tomorrow.');
+  }
+
   if (!response.ok || data.error) {
     throw new Error(data.error || `API error ${response.status}`);
   }
