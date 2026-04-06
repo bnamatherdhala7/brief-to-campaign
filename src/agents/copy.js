@@ -54,7 +54,7 @@ export async function runCopy(concept, brief, critiqueNotes, onEvent) {
       model: MODELS.COPY,
       system: SYSTEM,
       messages: [{ role: 'user', content: userMsg }],
-      max_tokens: 2048,
+      max_tokens: 3000,
     });
 
     const copyBundle = parseJSON(result.content);

@@ -14,11 +14,11 @@ export const MODELS = {
 
 // Agent color identity
 export const AGENT_COLORS = {
-  Orchestrator:   '#6860E6',
-  'Brief Analyst': '#0F6FD7',
-  Strategy:       '#12805C',
-  Copy:           '#CB6F10',
-  Critic:         '#D7373F',
+  Orchestrator:   '#9B8AFB',
+  'Brief Analyst': '#60A5FA',
+  Strategy:       '#34D399',
+  Copy:           '#FBBF24',
+  Critic:         '#F87171',
 };
 
 // Cost per token (USD)
