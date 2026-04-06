@@ -98,9 +98,21 @@ After copy is written, the Critic scores each channel. Any channel scoring below
 
 ---
 
-### 7. Campaign Pack — Copy Sections
+### 7. Campaign Pack — LinkedIn
 ![Campaign pack LinkedIn copy](docs/screenshots/08-campaign-pack-linkedin.png)
-> Each channel section renders a live social preview card (LinkedIn mockup shown here) followed by the raw copy fields — headline, body, CTA. The copy is ready to use or adapt.
+> Each channel renders a live platform preview card followed by the raw copy fields — headline, body, CTA. LinkedIn copy is written to platform conventions: professional tone, insight-led, line-break friendly.
+
+---
+
+### 8. Campaign Pack — Twitter / X
+![Campaign pack Twitter copy](docs/screenshots/09-campaign-pack-twitter.png)
+> Twitter copy is punchy and under 240 chars. The preview renders as a tweet card with an embedded link mockup, engagement counts, and the correct handle format.
+
+---
+
+### 9. Campaign Pack — Email
+![Campaign pack Email copy](docs/screenshots/10-campaign-pack-email.png)
+> Email copy renders as a realistic inbox preview — From header, subject line, body, and a styled CTA button. Written to be warm, benefit-led, and scannable.
 
 ---
 

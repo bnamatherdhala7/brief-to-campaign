@@ -3,7 +3,7 @@
 ## Project Overview
 A multi-agent AI system that transforms vague creative briefs into structured campaign packs.
 Built to demonstrate agent orchestration, FSM workflow design, and human-in-the-loop UX
-to engineering managers. Stack: React artifact + Anthropic API (Sonnet 4.6 + Haiku 4.5).
+. Stack: React artifact + Anthropic API (Sonnet 4.6 + Haiku 4.5).
 
 ---
 

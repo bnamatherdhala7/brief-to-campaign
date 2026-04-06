@@ -130,7 +130,11 @@ async function run() {
 
   await page.evaluate(() => window.scrollTo(0, 1100));
   await page.waitForTimeout(300);
-  await shot(page, '09-campaign-pack-twitter-email.png', 'Screen 9: Campaign pack — Twitter + Email');
+  await shot(page, '09-campaign-pack-twitter.png', 'Screen 9: Campaign pack — Twitter');
+
+  await page.evaluate(() => window.scrollTo(0, 1900));
+  await page.waitForTimeout(300);
+  await shot(page, '10-campaign-pack-email.png', 'Screen 10: Campaign pack — Email');
 
   await browser.close();
   console.log('\n✅  Done — all screenshots saved to docs/screenshots/\n');
