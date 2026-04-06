@@ -1,40 +1,41 @@
 /* ─── Fonts ─────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Adobe+Clean:wght@300;400;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&display=swap');
 
-/* ─── Design tokens ─────────────────────────────────────── */
+/* ─── Adobe Spectrum Design Tokens ──────────────────────── */
 :root {
-  /* Agent identity */
-  --c-orchestrator: #7F77DD;
-  --c-analyst:      #378ADD;
-  --c-strategy:     #1D9E75;
-  --c-copy:         #BA7517;
-  --c-critic:       #D85A30;
+  /* Agent identity — Adobe Spectrum palette */
+  --c-orchestrator: #7B61FF;   /* Spectrum Purple */
+  --c-analyst:      #1473E6;   /* Spectrum Blue   */
+  --c-strategy:     #2D9D78;   /* Spectrum Seafoam */
+  --c-copy:         #E68619;   /* Spectrum Orange  */
+  --c-critic:       #E34850;   /* Spectrum Red     */
 
-  /* Surface layers */
-  --bg-base:      #0D0F14;
-  --bg-elevated:  #161920;
-  --bg-floating:  #1E2230;
-  --bg-overlay:   #252A3A;
+  /* Surface layers — Adobe dark theme */
+  --bg-base:      #1C1C1C;   /* Spectrum Gray-900 equivalent */
+  --bg-elevated:  #242424;   /* Gray-800 */
+  --bg-floating:  #2C2C2C;   /* Gray-700 */
+  --bg-overlay:   #383838;   /* Gray-600 */
 
-  /* Text */
-  --text-primary:   #F0F2F8;
-  --text-secondary: #8B92A8;
-  --text-muted:     #4E5468;
+  /* Text — soft whites, not harsh */
+  --text-primary:   #E8E8E8;   /* Spectrum Gray-50  */
+  --text-secondary: #ABABAB;   /* Spectrum Gray-300 */
+  --text-muted:     #6E6E6E;   /* Spectrum Gray-500 */
 
   /* Borders */
   --border-subtle:  rgba(255,255,255,0.06);
-  --border-default: rgba(255,255,255,0.10);
-  --border-strong:  rgba(255,255,255,0.18);
+  --border-default: rgba(255,255,255,0.12);
+  --border-strong:  rgba(255,255,255,0.20);
 
-  /* Accent */
-  --accent:       #7F77DD;
-  --accent-glow:  rgba(127,119,221,0.15);
+  /* Accent — Adobe Blue */
+  --accent:       #1473E6;
+  --accent-glow:  rgba(20,115,230,0.15);
 
-  /* Status colors */
-  --status-started:   #378ADD;
-  --status-completed: #1D9E75;
-  --status-retrying:  #BA7517;
-  --status-failed:    #D85A30;
+  /* Status colors — Spectrum semantic */
+  --status-started:   #1473E6;   /* Blue   */
+  --status-completed: #2D9D78;   /* Green  */
+  --status-retrying:  #E68619;   /* Orange */
+  --status-failed:    #E34850;   /* Red    */
 
   /* Spacing */
   --space-1:  4px;
@@ -48,8 +49,8 @@
   --space-12: 48px;
   --space-16: 64px;
 
-  /* Typography */
-  --font-display: 'DM Serif Display', Georgia, serif;
+  /* Typography — Source Serif for display, DM Sans for body */
+  --font-display: 'Source Serif 4', 'DM Serif Display', Georgia, serif;
   --font-body:    'DM Sans', system-ui, sans-serif;
 
   --text-xs:   11px;
@@ -60,10 +61,10 @@
   --text-2xl:  28px;
   --text-3xl:  36px;
 
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 20px;
 }
 
 /* ─── Reset ──────────────────────────────────────────────── */
@@ -82,19 +83,19 @@ body {
 
 #root { min-height: 100dvh; display: flex; flex-direction: column; }
 
-h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.03em; }
+h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.02em; }
 
-::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 2px; }
 
-::selection { background: var(--accent-glow); }
+::selection { background: rgba(20,115,230,0.25); }
 
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
 
 /* ─── Animations ─────────────────────────────────────────── */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
+  from { opacity: 0; transform: translateY(4px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes spin {
@@ -104,10 +105,6 @@ h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.03em; }
   0%, 100% { opacity: 1; }
   50%       { opacity: 0.3; }
 }
-@keyframes shimmer {
-  from { background-position: -200% 0; }
-  to   { background-position:  200% 0; }
-}
 
-.animate-in { animation: fadeIn 220ms ease both; }
+.animate-in { animation: fadeIn 200ms ease both; }
 .spin        { animation: spin 700ms linear infinite; }
