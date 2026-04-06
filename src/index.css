@@ -4,38 +4,38 @@
 
 /* ─── Adobe Spectrum Design Tokens ──────────────────────── */
 :root {
-  /* Agent identity — Adobe Spectrum palette */
-  --c-orchestrator: #7B61FF;   /* Spectrum Purple */
-  --c-analyst:      #1473E6;   /* Spectrum Blue   */
-  --c-strategy:     #2D9D78;   /* Spectrum Seafoam */
-  --c-copy:         #E68619;   /* Spectrum Orange  */
-  --c-critic:       #E34850;   /* Spectrum Red     */
+  /* Agent identity — Adobe Spectrum light palette */
+  --c-orchestrator: #6860E6;   /* Indigo   */
+  --c-analyst:      #0F6FD7;   /* Blue     */
+  --c-strategy:     #12805C;   /* Green    */
+  --c-copy:         #CB6F10;   /* Orange   */
+  --c-critic:       #D7373F;   /* Red      */
 
-  /* Surface layers — Adobe dark theme */
-  --bg-base:      #1C1C1C;   /* Spectrum Gray-900 equivalent */
-  --bg-elevated:  #242424;   /* Gray-800 */
-  --bg-floating:  #2C2C2C;   /* Gray-700 */
-  --bg-overlay:   #383838;   /* Gray-600 */
+  /* Surface layers — clean white light theme */
+  --bg-base:      #F8F8F8;   /* Off-white page      */
+  --bg-elevated:  #FFFFFF;   /* White cards         */
+  --bg-floating:  #F3F3F3;   /* Subtle raised       */
+  --bg-overlay:   #E8E8E8;   /* Input backgrounds   */
 
-  /* Text — soft whites, not harsh */
-  --text-primary:   #E8E8E8;   /* Spectrum Gray-50  */
-  --text-secondary: #ABABAB;   /* Spectrum Gray-300 */
-  --text-muted:     #6E6E6E;   /* Spectrum Gray-500 */
+  /* Text */
+  --text-primary:   #1A1A1A;
+  --text-secondary: #555555;
+  --text-muted:     #909090;
 
   /* Borders */
-  --border-subtle:  rgba(255,255,255,0.06);
-  --border-default: rgba(255,255,255,0.12);
-  --border-strong:  rgba(255,255,255,0.20);
+  --border-subtle:  rgba(0,0,0,0.06);
+  --border-default: rgba(0,0,0,0.12);
+  --border-strong:  rgba(0,0,0,0.22);
 
   /* Accent — Adobe Blue */
-  --accent:       #1473E6;
-  --accent-glow:  rgba(20,115,230,0.15);
+  --accent:       #0F6FD7;
+  --accent-glow:  rgba(15,111,215,0.10);
 
-  /* Status colors — Spectrum semantic */
-  --status-started:   #1473E6;   /* Blue   */
-  --status-completed: #2D9D78;   /* Green  */
-  --status-retrying:  #E68619;   /* Orange */
-  --status-failed:    #E34850;   /* Red    */
+  /* Status colors */
+  --status-started:   #0F6FD7;
+  --status-completed: #12805C;
+  --status-retrying:  #CB6F10;
+  --status-failed:    #D7373F;
 
   /* Spacing */
   --space-1:  4px;
@@ -87,9 +87,9 @@ h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.02em; }
 
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 2px; }
+::-webkit-scrollbar-thumb { background: #CCCCCC; border-radius: 2px; }
 
-::selection { background: rgba(20,115,230,0.25); }
+::selection { background: rgba(15,111,215,0.15); }
 
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
 

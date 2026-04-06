@@ -156,8 +156,8 @@ export function TracePanel({ events, currentState }) {
     <aside style={{
       width: '100%',
       height: '100%',
-      background: 'var(--bg-elevated)',
-      borderRight: '1px solid var(--border-subtle)',
+      background: 'var(--bg-floating)',
+      borderRight: '1px solid var(--border-default)',
       display: 'flex',
       flexDirection: 'column',
       overflow: 'hidden',

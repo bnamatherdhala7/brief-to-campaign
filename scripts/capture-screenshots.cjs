@@ -9,7 +9,7 @@ const path = require('path');
 const fs = require('fs');
 
 const OUT    = path.join(__dirname, '..', 'docs', 'screenshots');
-const APP    = 'http://localhost:5174';
+const APP    = 'http://localhost:5173';
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const BRIEF  = 'Launch campaign for Notion AI — target SaaS product managers at B2B companies. Goal: signups. Tone: smart, confident, slightly witty. Channels: LinkedIn, Email, Twitter.';
 
