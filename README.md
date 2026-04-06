@@ -6,13 +6,75 @@
 
 ## The Problem
 
-Marketing teams start with a brief like:
+Every marketer has the same wall. They know what they want to say. They just can't get it out fast enough — or well enough — to matter.
 
-> *"Launch something for our new AI feature. Target developers. Make it feel smart."*
+A product launches next week. The founder has the story in their head — the audience, the angle, the urgency. But turning that mental brief into a LinkedIn post, an email, and a tweet — each adapted for its platform, each on-brand, each strategically sound — takes hours they don't have. So they rush it, post something mediocre, and leave reach on the table. Every single week.
 
-That brief is too vague to act on — but too common to ignore. Someone has to extract the structure, generate strategy options, write copy for each channel, and check the quality. That process takes hours and multiple people.
+```
+What exists in their head          →  3–5 hrs of manual work  →  What needs to exist
+─────────────────────────────────                                 ──────────────────────
+The product story                                                 LinkedIn post
+The target audience                                               Email campaign
+The launch goal                                                   Twitter copy
+The brand voice                                                   Per audience segment
+```
 
-This system does it in under 60 seconds, transparently, with every agent decision visible and auditable.
+This gap has **three layers** — and today's tools solve none of them properly:
+
+1. **The brief is always vague** — Nobody writes a perfect brief. Every tool takes vague input and runs with it. Garbage in, garbage out.
+2. **The strategic layer is always skipped** — ChatGPT, Jasper, Copy.ai all jump straight from brief to copy. They skip the most important step: deciding what *angle* to take before writing a single word. That's why AI copy feels generic.
+3. **Output is a blob, not a deliverable** — You get one wall of text. No channel adaptation, no quality check, no reasoning, no structured pack you can hand off.
+
+---
+
+## The Market
+
+This isn't a niche pain. It's a $205 billion market with a workflow nobody has fixed.
+
+| Stat | Figure |
+|---|---|
+| Creator economy 2024 | **$205B** → $1.3T by 2033 |
+| Active creators worldwide | **207M** — all facing this problem |
+| Hours wasted per marketer per year | **328 hrs** duplicating content work |
+| Marketers using AI in workflow today | **75%** — but still describe output as generic |
+| Marketers who feel overloaded | **80%** |
+
+**AI adoption is mainstream — but it's solving the wrong problem.** The tools made content faster. They didn't make it better, structured, or scalable.
+
+### Competitive landscape
+
+| Tool | What it skips |
+|---|---|
+| ChatGPT / Claude direct | No structure, no concept step, no channel adaptation, no quality check |
+| Jasper / Copy.ai | No strategic layer, no brief extraction, no critic loop |
+| Agencies | $3–10k/month, week turnaround, not scalable for weekly cadence |
+| **This system** | **Brief extraction + concept step + channel-adapted copy + quality enforcement — under $0.01/run** |
+
+---
+
+## The Solution
+
+A 5-agent workflow that externalises the strategic thinking that used to live only in an expert's head. Not a prompt wrapper. Not a template tool. A structured campaign operations system — brief in, campaign pack out.
+
+```
+Orchestrator → Brief Analyst → Strategy → Copy → Critic → Campaign Pack
+```
+
+**How each agent solves one layer of the problem:**
+
+1. **Brief Analyst** fixes vague input — extracts structured JSON (product, audience, goal, channels, tone), identifies gaps, asks max 2 targeted questions. Brief is complete before a word of copy is written.
+
+2. **Strategy Agent** adds the missing concept layer — generates 3 campaign angles, each with a name, hook, rationale, and confidence score. User picks one before copy is written. No other tool does this step.
+
+3. **Copy Agent + Critic** turns output into a deliverable — channel-specific copy for LinkedIn, email, Twitter in one batched call. Critic scores each against the brief. Below 6/10 triggers auto-retry. Output is reviewed, scored, and handoff-ready.
+
+**Outcome:** Brief to campaign pack in under 3 minutes. Total API cost: ~$0.01 per run.
+
+---
+
+## The One-Line Pitch
+
+> *We built the first AI workflow that takes a vague brief and returns a structured, channel-ready, quality-scored campaign pack in under 3 minutes — for a cent — so marketers can run campaigns at scale without sacrificing strategy, consistency, or brand voice.*
 
 ---
 
@@ -26,9 +88,9 @@ This system does it in under 60 seconds, transparently, with every agent decisio
 | **Brief Analyst** | Haiku | Extracts structured schema: product, audience, goal, channels, tone. Flags gaps. |
 | **Strategy** | Sonnet | Generates 3 distinct campaign concepts with confidence scores. |
 | **Copy** | Sonnet | Writes headline + body + CTA for all 3 channels in one batched call. |
-| **Critic** | Haiku | Scores copy 0–10 per channel vs brief fidelity. Triggers retry if any score < 7. |
+| **Critic** | Haiku | Scores copy 0–10 per channel vs brief fidelity. Triggers retry if score < 6. |
 
-Haiku handles structured extraction and evaluation (pattern matching). Sonnet handles creative reasoning. This keeps cost under **~$0.008 per campaign**.
+Haiku handles structured extraction and evaluation. Sonnet handles creative reasoning. This keeps cost under **~$0.01 per campaign**.
 
 ### Finite State Machine
 
@@ -51,12 +113,8 @@ Every transition is logged as a typed `AgentEvent` and shown live in the trace p
 
 ### Two Human-in-the-Loop Gates
 
-1. **Clarification gate** — if the Brief Analyst finds missing fields (e.g. no audience, no goal), it surfaces max 2 targeted questions. The workflow is blocked until answered.
-2. **Concept selection gate** — the Strategy Agent returns 3 concepts. The user must pick one before copy is written. Includes a "Regenerate" option with cost estimate shown.
-
-### Critic → Retry Loop
-
-After copy is written, the Critic scores each channel. Any channel scoring below 7/10 is flagged for revision. The Copy Agent retries with the critique notes as additional context. Max 2 retries — after that, the critique notes are surfaced to the user alongside the output.
+1. **Clarification gate** — if the Brief Analyst finds missing fields, it surfaces max 2 targeted questions. The workflow is blocked until answered.
+2. **Concept selection gate** — the Strategy Agent returns 3 concepts. The user must pick one before copy is written.
 
 ---
 
@@ -64,55 +122,43 @@ After copy is written, the Critic scores each channel. Any channel scoring below
 
 ### 1. Brief Input
 ![Brief input screen](docs/screenshots/01-brief-input.png)
-> The landing screen. Paste a rough brief in plain English — or pick one of the examples. The pipeline preview ("Analyse → Strategy → Write Copy → Review") sets expectations before a single token is spent.
+> The landing screen. Paste a rough brief — or pick an example. The pipeline preview sets expectations before a single token is spent.
 
 ---
 
-### 2. Brief Filled In
-![Brief filled in](docs/screenshots/02-brief-filled.png)
-> Once you start typing the CTA button activates. The agents will surface a clarification gate if anything critical is missing — you don't need a perfect brief.
-
----
-
-### 3. Agents Running — Live Trace Panel
+### 2. Agents Running — Live Trace Panel
 ![Agents running with trace panel](docs/screenshots/03-agents-running.png)
-> Immediately after submit, the two-column layout appears. Left: the live agent trace panel — each event streams in as it fires, showing agent name, status badge, model used (Haiku vs Sonnet), latency in ms, and token count. Right: the progress stepper at the top shows exactly where you are in the pipeline with time estimates for upcoming steps. The running card shows which agent is active, what it's doing, and what comes next.
+> Two-column layout: left is the live agent trace (agent name, status, model, latency, tokens), right shows the progress stepper and which agent is running with context on what comes next.
 
 ---
 
-### 4. Concept Picker (Human Gate 1)
+### 3. Concept Picker (Human Gate 1)
 ![Concept picker with confidence scores](docs/screenshots/05-concept-picker.png)
-> The Strategy Agent returns 3 meaningfully different campaign angles, each with a confidence score (0–100%) reflecting how well it matches the stated goal. **The workflow is blocked until you pick one.** This is a deliberate human checkpoint — the selected concept becomes the creative brief for the Copy agent.
+> Strategy Agent returns 3 campaign angles with confidence scores. **Workflow is blocked until you pick one.** This is the step every other AI tool skips.
 
 ---
 
-### 5. Copy Agent Writing
+### 4. Copy Agent Writing
 ![Copy agent writing](docs/screenshots/06-copy-writing.png)
-> The Copy agent writes LinkedIn, Email and Twitter copy in a **single batched API call** — not 3 separate calls. The progress stepper updates in real time. "What's next" shows the remaining steps so you always know the end is in sight.
+> Copy agent writes LinkedIn, Email and Twitter in a **single batched API call**. Progress stepper shows remaining steps.
 
 ---
 
-### 6. Campaign Pack — Output
-![Campaign pack top](docs/screenshots/07-campaign-pack-top.png)
-> The finished campaign pack. The concept name and hook are shown at the top, with quality scores per channel from the Critic agent (e.g. LinkedIn: 8/10, Email: 7/10, Twitter: 9/10). The cost counter in the top right shows the total spend for the full 5-agent run — typically $0.006–0.010.
+### 5. Campaign Pack — LinkedIn
+![Campaign pack LinkedIn](docs/screenshots/08-campaign-pack-linkedin.png)
+> Finished campaign pack with quality scores per channel. Live LinkedIn preview card + raw copy fields (headline, body, CTA).
 
 ---
 
-### 7. Campaign Pack — LinkedIn
-![Campaign pack LinkedIn copy](docs/screenshots/08-campaign-pack-linkedin.png)
-> Each channel renders a live platform preview card followed by the raw copy fields — headline, body, CTA. LinkedIn copy is written to platform conventions: professional tone, insight-led, line-break friendly.
+### 6. Campaign Pack — Twitter
+![Campaign pack Twitter](docs/screenshots/09-campaign-pack-twitter.png)
+> Twitter copy rendered as a tweet card with embedded link mockup. Punchy, under 240 chars, with hashtags.
 
 ---
 
-### 8. Campaign Pack — Twitter / X
-![Campaign pack Twitter copy](docs/screenshots/09-campaign-pack-twitter.png)
-> Twitter copy is punchy and under 240 chars. The preview renders as a tweet card with an embedded link mockup, engagement counts, and the correct handle format.
-
----
-
-### 9. Campaign Pack — Email
-![Campaign pack Email copy](docs/screenshots/10-campaign-pack-email.png)
-> Email copy renders as a realistic inbox preview — From header, subject line, body, and a styled CTA button. Written to be warm, benefit-led, and scannable.
+### 7. Campaign Pack — Email
+![Campaign pack Email](docs/screenshots/10-campaign-pack-email.png)
+> Email rendered as a realistic inbox preview — From header, subject line, body, CTA button. Warm, benefit-led, scannable.
 
 ---
 
@@ -138,11 +184,9 @@ npm run dev
 
 Open **http://localhost:5173** (or the port Vite picks if 5173 is in use).
 
-### How the local setup works
-
 `npm run dev` runs two processes via `concurrently`:
-- **`node server.cjs`** — a plain Node HTTP proxy on port 3001 that forwards requests to the Anthropic API using your key from `.env`. This exists because browsers can't call the Anthropic API directly (no CORS + key exposure).
-- **`vite`** — the React dev server, configured to proxy `/api/*` to `localhost:3001`.
+- **`node server.cjs`** — Node proxy on port 3001 that forwards requests to the Anthropic API using your `.env` key.
+- **`vite`** — React dev server, configured to proxy `/api/*` to `localhost:3001`.
 
 ---
 
@@ -200,7 +244,7 @@ interface CopyBundle {
 
 interface CritiqueResult {
   scores: { linkedin: number; email: number; twitter: number };
-  retry: string[];          // channels scoring < 7
+  retry: string[];          // channels scoring < 6
   notes: string;
 }
 ```
@@ -215,9 +259,9 @@ interface CritiqueResult {
 | Strategy | Sonnet | ~$0.0011 |
 | Copy | Sonnet | ~$0.0042 |
 | Critic | Haiku | ~$0.0009 |
-| **Total** | | **~$0.006–0.009** |
+| **Total** | | **~$0.006–0.010** |
 
-With up to 2 Critic-triggered retries: max ~$0.014. A $0.05 cap is enforced in the UI.
+With 1 Critic-triggered retry: max ~$0.016. A $0.05 cap is enforced in the UI.
 
 ---
 
@@ -227,10 +271,10 @@ With up to 2 Critic-triggered retries: max ~$0.014. A $0.05 cap is enforced in t
 Routing, extraction, and evaluation are structured comparisons — they don't need Sonnet's reasoning depth. Sonnet is reserved for the two tasks that genuinely require creativity: ideating concepts and writing copy.
 
 **Why batch all 3 channels in one Copy call?**
-Three separate calls would triple the latency and input token cost (the system prompt + brief + concept would be sent three times). One call with all channels specified is ~40% cheaper.
+Three separate calls would triple the latency and input token cost. One batched call is ~40% cheaper.
 
 **Why an explicit FSM?**
-An implicit workflow (a chain of `await` calls) is invisible and hard to debug. The FSM makes every state transition a named, logged, validatable event — which is exactly what you need when something goes wrong at 2am.
+An implicit workflow (a chain of `await` calls) is invisible and hard to debug. The FSM makes every state transition a named, logged, validatable event.
 
 **Why two human checkpoints?**
-The clarification gate ensures the agents never hallucinate missing brief fields. The concept selection gate ensures a human owns the creative direction before tokens are spent on full copy. Both gates are non-bypassable by design.
+The clarification gate ensures agents never hallucinate missing brief fields. The concept selection gate ensures a human owns the creative direction before tokens are spent on copy. Both are non-bypassable by design.
